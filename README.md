@@ -2,7 +2,7 @@
 
 Deep Neural Network modeled with Keras to clone human behavior of steering a car around a virtual track using camera images and OpenCV.
 
-![GIF](examples/BehavioralCloning.gif)
+![GIF](examples/behavior_cloning.gif)
 
 If you would teach someone how to drive, how would you go about it?
 Would you tell them "if the car is not centered on the road, figure out the offset in meters and then compute the steering angle in radians to compensate the offset knowing that the car's yaw rate is the velocity divided by the distance between the two axels times the tangent of the steering angle"?
@@ -110,7 +110,7 @@ Even if data augmentation had a big impact it was still not enough to drive the 
 ## Model Architecture
 
 
-Since this project is based on the research conducted by [NVIDIA](​https://devblogs.nvidia.com/deep-learning-self-driving-cars/) I chose to use the model presented by them. 
+Since this project is based on the research conducted by NVIDIA, I chose to use the model presented by them. 
 
 ![NvidiaModel](examples/NvidiaModel.JPG)
 
@@ -213,6 +213,10 @@ model.fit_generator(generator = data_generator(train_data),
                     validation_steps = math.ceil(len(val_data)   / 128)    )
 model.save('model.h5')
 ```
+
+![training](examples/training.JPG)
+training
+
 
 
 ## Simulation Video
