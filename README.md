@@ -98,7 +98,9 @@ labels.append(flipped_label)
 
 When running the model to predict steering angles, only the central camera is used. The left camera provides a shifted perspective. If the left image was seen from the central camera, the labeled steering angle needs to be adjusted to steer towards the right hand side of the road. The correction factor of `0.2` was chosen through trial and error.
 
-This data augmentation technique is used to train the model for recovery situations in which the vehicle drifts to the side. The full laps provided with this repository were driven manually while generally keeping the car in the center of the road. Without the addition of left and right camera pictures, the model would not learn to steer the car from te side, back to the middle of the road. One could think that if the model was trained to drive on the middle of the road that the car will never end up off center. Neverthe less this happends due to imperfect predicted angles and recovery manouvers are essential for this neural network.
+This data augmentation technique is used to train the model for recovery situations in which the vehicle drifts to the side. The full laps provided with this repository were driven manually while generally keeping the car in the center of the road. Without the addition of left and right camera pictures, the model would not learn to steer the car from te side, back to the middle of the road. 
+
+One could think that if the model was trained to drive on the middle of the road that the car will never end up off center. Nevertheless this happends due to imperfect predicted angles and recovery manouvers are essential for this neural network.
  
 Even if data augmentation had a big impact it was still not enough to drive the vehicle all the way around the track. I encountered difficulties in sharp curves and I recorded those sections of the track multiple times. I did not include those recordings in this repository due to space limitations. 
 
@@ -157,13 +159,9 @@ model.add(Conv2D(64, (3,3), activation="elu"))
 model.add(Conv2D(64, (3,3), activation="elu"))
 ```
 
-Additionally there are 2 more convolutional layers with a kernel of 3x3 and striding of 1. These layers have a consistent height of 64 and do not skip data to learn associations between the selected characteristics of the road with the steering angle.
+Additionally there are 2 more convolutional layers with a kernel of 3x3 and striding of 1. These layers have a consistent height of 64 and do not skip data to learn associations between the selected characteristics of the road with the steering angle. Each convolution layer is followed by a rectified linear unit layer to allow for non linearity. 
 
-Each convolution layer is followed by a rectified linear unit layer to allow for non linearity. 
-
-At the top of the model there are 3 fully connected layers that are linked by the flattened result of the 5 convolutional layers.
-
-During training I noticed that the model was overfitting the data. This was visible throught the loss value that was decreasing and then increasing. I added a `Dropout` layer to reduce the overfitting.
+At the top of the model there are 3 fully connected layers that are linked by the flattened result of the 5 convolutional layers. During training I noticed that the model was overfitting the data. This was visible throught the loss value that was decreasing and then increasing. I added a `Dropout` layer to reduce the overfitting.
 
 ```
 #flatten image from 2D to side by side
@@ -182,8 +180,6 @@ model.add(Dense(1))
 
 I tried adding more than one dropout layer but the validation loss was not decreasing by so much and the car had a harder time driving around. So in the end I only kept one dropout layer after the Dense 100 fully connected layer. 
 
-The output is only one value, the steering angle.
-
 This is a very powerful model and rather simple and elegant at the same time given the complexity of the task of steering a car around the track.  
 
 ![model1](examples/model1.JPG)
@@ -193,6 +189,30 @@ This is a very powerful model and rather simple and elegant at the same time giv
 
 
 ## Model Training
+
+The dataset consists of  202830 labeled images. 80% of them were used for training, that means 162264. 20%  were used for validation.  
+
+```
+train_data, val_data = train_test_split(lines, test_size = 0.2)
+```
+
+The loss is calculated using mean squared error to minimize the deviation between the predicted steering angle and the one recorded while manually driving around the track. The `adam` optimizer is used to tune the hyperparameters like the learning rate. 
+
+```
+model.compile(loss='mse',optimizer='adam')
+```
+
+The model is fitted using a generator which yields pictures in batches of 128. The generator avoids the need of loading the entire batch in the RAM memory. Two epochs are enough, more induced overfitting in my case.
+
+```
+model.fit_generator(generator = data_generator(train_data),
+                    validation_data = data_generator(val_data),
+                    epochs = 2,
+                    steps_per_epoch  = math.ceil(len(train_data) / 128),
+                    validation_steps = math.ceil(len(val_data)   / 128)    )
+model.save('model.h5')
+```
+
 
 ## Simulation Video
 
