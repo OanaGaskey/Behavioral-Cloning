@@ -215,10 +215,9 @@ model.save('model.h5')
 ```
 
 ![training](examples/training.JPG)
-training
-
 
 
 ## Simulation Video
 
-Check out the video to see the car driving autonomously around the track. The view is through the images recorded by the central camera. You can download the video here: [video.mp4](video.mp4)
+Check out the video to see the car driving autonomously around the track. The view is through the images recorded by the central camera. 
+You can download the video here: [video.mp4](video.mp4)
