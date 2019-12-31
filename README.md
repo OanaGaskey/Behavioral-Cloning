@@ -1,6 +1,6 @@
 # Behavioral Cloning
 
-Deep Neural Network modeled in Keras to clone human behavior of steering a car around a virtual track using camera images.
+Deep Neural Network modeled with Keras to clone human behavior of steering a car around a virtual track using camera images and OpenCV.
 
 ![GIF](examples/BehavioralCloning.gif)
 
@@ -30,6 +30,7 @@ The simulator setup is the equivalent to the NVIDIA platform pictured below. Thr
 
 
 Data is recorded while driving manually around the track. One recording will result in an `IMG` folder with pictures from all three cameras and a `driving_log.csv` file. In this repository I included data from driving a two laps, each in opposite direction: [fulllap](fulllap); [fulllapcounter](fulllapcounter).
+
 
 ![l_c_r](examples/l_c_r.JPG)
 
@@ -102,9 +103,94 @@ This data augmentation technique is used to train the model for recovery situati
 Even if data augmentation had a big impact it was still not enough to drive the vehicle all the way around the track. I encountered difficulties in sharp curves and I recorded those sections of the track multiple times. I did not include those recordings in this repository due to space limitations. 
 
 
-## Generators
 
 ## Model Architecture
+
+
+Since this project is based on the research conducted by [NVIDIA](​https://devblogs.nvidia.com/deep-learning-self-driving-cars/) I chose to use the model presented by them. 
+
+![NvidiaModel](examples/NvidiaModel.JPG)
+
+
+This is a multilayer convolutional network that takes as input RGB images which are represented in 3 channels, normalizes the data and applies 5 layers of convolutions. At the top there are 3 fully connected layers that link to the output one value which represents the steering angle to control the vehicle. 
+
+I adjusted the above model, and added a few layers to make it work for my track. I started by adding a `Cropping2D` layer to remove the top and bottom sections of the picture. These sections represent the car's hood and the track's background which and are not relevant for steering. 
+
+```
+model = Sequential()
+#add cropping layer
+model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,3)))
+```
+
+Keeping only relevant data has a major impact in the model's performance. This implies that in autonomous mode, the car won't steer based on the shape of the trees or the rocks around. Initially, I thought that the landmarks could be useful and that they would serve as refference points for sharp curves. The experiments proved me wrong, so I kept the cropping layer.
+
+Original image:
+![fullimage](examples/fullimage.JPG)
+
+Cropped image:
+![croppedimage](examples/croppedimage.JPG)
+
+
+The second layer is a Lambda layer used to normalize data. Normalized, zero centered data leads to better model performance. Weights and biases are easier train and assure loss minimisation.
+
+```
+#normalize data
+model.add(Lambda (lambda x: (x / 255.0) - 0.5) )
+```
+
+These first two layers are not trainable, meaning that there are no nodes or weights and biases to train.
+
+The model that was released by NVIDIA is composed by 5 consecutive convolutional layers followed by 3 consecutive fully connected layers. The convolutions start with a 5x5 kernel applied with a stride 2 on both vertical and horizontal directions. 
+
+Normally I would have thought that having a stride of 2 would imply losing data and would have a lower performance. In fact, this is an application that detects and learns the shape of the road. This is different than detecting fine details in images like handwriting, so a stride 2 for 5x5 kernels works. There are 3 consecutive 5x5 convolution layers that boil down the data in the pictures and learn to extract the most relevant features like edges for example.
+
+```
+#layer 1- Convolution, no of filters- 24, filter size= 5x5, stride= 2x2
+model.add(Conv2D(24, (5, 5), strides=(2, 2), activation="elu"))
+#layer 2- Convolution, no of filters- 36, filter size= 5x5, stride= 2x2
+model.add(Conv2D(36, (5,5), strides=(2, 2), activation="elu"))
+#layer 3- Convolution, no of filters- 48, filter size= 5x5, stride= 2x2
+model.add(Conv2D(48, (5,5), strides=(2, 2), activation="elu"))
+#layer 4- Convolution, no of filters- 64, filter size= 3x3, stride= 1x1
+model.add(Conv2D(64, (3,3), activation="elu"))
+#layer 5- Convolution, no of filters- 64, filter size= 3x3, stride= 1x1
+model.add(Conv2D(64, (3,3), activation="elu"))
+```
+
+Additionally there are 2 more convolutional layers with a kernel of 3x3 and striding of 1. These layers have a consistent height of 64 and do not skip data to learn associations between the selected characteristics of the road with the steering angle.
+
+Each convolution layer is followed by a rectified linear unit layer to allow for non linearity. 
+
+At the top of the model there are 3 fully connected layers that are linked by the flattened result of the 5 convolutional layers.
+
+During training I noticed that the model was overfitting the data. This was visible throught the loss value that was decreasing and then increasing. I added a `Dropout` layer to reduce the overfitting.
+
+```
+#flatten image from 2D to side by side
+model.add(Flatten())
+#layer 6- fully connected layer 1
+model.add(Dense(100, activation="elu"))
+#dropout layer to avoid overfitting
+model.add(Dropout(0.25))
+#layer 7- fully connected layer 1
+model.add(Dense(50, activation="elu"))
+#layer 8- fully connected layer 1
+model.add(Dense(10, activation="elu"))
+#layer 9- fully connected layer 1
+model.add(Dense(1))
+```
+
+I tried adding more than one dropout layer but the validation loss was not decreasing by so much and the car had a harder time driving around. So in the end I only kept one dropout layer after the Dense 100 fully connected layer. 
+
+The output is only one value, the steering angle.
+
+This is a very powerful model and rather simple and elegant at the same time given the complexity of the task of steering a car around the track.  
+
+![model1](examples/model1.JPG)
+![model2](examples/model2.JPG)
+![model3](examples/model3.JPG)
+
+
 
 ## Model Training
 
