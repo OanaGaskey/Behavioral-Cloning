@@ -37,6 +37,7 @@ Data is recorded while driving manually around the track. One recording will res
 
 The `driving_log.csv` has the following structure, providing images path and names and recorded comands. Only the `steering angle` is used from the recorded comands.
 
+
 ![data_rec](examples/data_rec.JPG)
 
 
@@ -216,5 +217,4 @@ model.save('model.h5')
 
 ## Simulation Video
 
-[![HighwayDriving](https://img.youtube.com/vi/QEajKfN8Oxo/0.jpg)](https://www.youtube.com/watch?v=QEajKfN8Oxo)
- Click on the image to see the video!
+Check out the video to see the car driving autonomously around the track. The view is through the images recorded by the central camera. You can download the video here: [video.mp4](video.mp4)
