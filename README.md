@@ -2,7 +2,7 @@
 
 Deep Neural Network modeled with Keras to clone human behavior of steering a car around a virtual track using camera images and OpenCV.
 
-![GIF](examples/behavior_cloning.gif)
+![GIF](examples/behavioral_cloning.gif)
 
 If you would teach someone how to drive, how would you go about it?
 Would you tell them "if the car is not centered on the road, figure out the offset in meters and then compute the steering angle in radians to compensate the offset knowing that the car's yaw rate is the velocity divided by the distance between the two axels times the tangent of the steering angle"?
@@ -220,10 +220,12 @@ model.save('model.h5')
 ## Simulation Video
 
 Check out the video to see the car driving autonomously around the track. 
+
 This view is through the images recorded by the central camera. 
 You can download the video here: [video.mp4](video.mp4)
 
 This view is from the simulator.
+
 [![BehavioralCloning](https://img.youtube.com/vi/tOHwQpGa6ks/0.jpg)](https://youtu.be/tOHwQpGa6ks)
 
  Click on the image to see the video!
