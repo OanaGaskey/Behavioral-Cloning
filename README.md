@@ -8,7 +8,7 @@ If you would teach someone how to drive, how would you go about it?
 Would you tell them "if the car is not centered on the road, figure out the offset in meters and then compute the steering angle in radians to compensate the offset knowing that the car's yaw rate is the velocity divided by the distance between the two axels times the tangent of the steering angle"?
 or would you say "just steer the car while driving around until you get the *feel* for it"?
 
-This philosophy is at the core of my project. The idea was developed by the researchers at NVIDIA and is explained in this [article](​https://devblogs.nvidia.com/deep-learning-self-driving-cars).
+This philosophy is at the core of my project. The idea was developed by the researchers at NVIDIA and is explained in this article: [(https://devblogs.nvidia.com/deep-learning-self-driving-cars](​https://devblogs.nvidia.com/deep-learning-self-driving-cars).
 
 The end-to-end technique of steering a car is based on convolutional neural networks to map the raw pixels from front-facing cameras to the steering commands for a self-driving car.
 
